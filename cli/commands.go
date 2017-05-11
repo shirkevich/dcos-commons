@@ -31,6 +31,7 @@ func GetArguments() []string {
 func HandleDefaultSections(app *kingpin.Application) {
 	commands.HandleConfigSection(app)
 	commands.HandleEndpointsSection(app)
+	commands.HandlePackageSection(app)
 	commands.HandlePlanSection(app)
 	commands.HandlePodsSection(app)
 	commands.HandleStateSection(app)
