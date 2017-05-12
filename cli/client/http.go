@@ -60,10 +60,6 @@ func HTTPServicePost(urlPath string) *http.Response {
 	return checkHTTPResponse(httpQuery(CreateHTTPRequest("POST", servicePath)))
 }
 
-func HTTPPost(urlPath string) *http.Response {
-	return checkHTTPResponse(httpQuery(CreateHTTPRequest("POST", urlPath)))
-}
-
 func HTTPServicePostQuery(urlPath, urlQuery string) *http.Response {
 	servicePath := getServicePath(urlPath)
 	return checkHTTPResponse(httpQuery(createHTTPQueryRequest("POST", servicePath, urlQuery)))
