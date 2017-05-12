@@ -20,6 +20,10 @@ func HTTPServiceGet(urlPath string) *http.Response {
 	return checkHTTPResponse(httpQuery(CreateHTTPRequest("GET", servicePath)))
 }
 
+func HTTPGet(urlPath string) *http.Response {
+	return checkHTTPResponse(httpQuery(CreateHTTPRequest("GET", urlPath)))
+}
+
 func HTTPServiceGetQuery(urlPath, urlQuery string) *http.Response {
 	servicePath := getServicePath(urlPath)
 	return checkHTTPResponse(httpQuery(createHTTPQueryRequest("GET", servicePath, urlQuery)))
