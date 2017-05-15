@@ -19,10 +19,6 @@ func HTTPServiceGet(urlPath string) *http.Response {
 	return checkHTTPResponse(httpQuery(createServiceHTTPRequest("GET", urlPath)))
 }
 
-func HTTPCosmosGetJSON(urlPath, jsonPayload string) *http.Response {
-	return checkHTTPResponse(httpQuery(createCosmosHTTPJSONRequest("GET", urlPath, jsonPayload)))
-}
-
 func HTTPServiceGetQuery(urlPath, urlQuery string) *http.Response {
 	return checkHTTPResponse(httpQuery(createServiceHTTPQueryRequest("GET", urlPath, urlQuery)))
 }
@@ -216,28 +212,29 @@ func getDCOSURL() {
 
 func createServiceURL(urlPath, urlQuery string) *url.URL {
 	getDCOSURL()
-	joinedUrlPath := path.Join(config.DcosUrl, "service", config.ServiceName, urlPath)
-	return createURL(joinedUrlPath, urlQuery)
+	joinedURLPath := path.Join("service", config.ServiceName, urlPath)
+	return createURL(config.DcosUrl, joinedURLPath, urlQuery)
 }
 
 func createCosmosURL(urlPath string) *url.URL {
-	joinedUrlPath := ""
+	joinedURLPath := ""
 	// Try to fetch the Cosmos URL from the system configuration
 	if len(config.CosmosUrl) == 0 {
 		config.CosmosUrl = OptionalCLIConfigValue("package.cosmos_url")
 	}
+
 	// Use Cosmos URL if we have it specified
 	if len(config.CosmosUrl) > 0 {
-		joinedUrlPath = path.Join(config.CosmosUrl, urlPath) // e.g. https://<cosmos_url>/service/describe
-	} else {
-		getDCOSURL()
-		joinedUrlPath = path.Join(config.DcosUrl, "cosmos", urlPath) // e.g. https://<dcos_url>/cosmos/service/describe
+		joinedURLPath = path.Join("service", urlPath) // e.g. https://<cosmos_url>/service/describe
+		return createURL(config.CosmosUrl, joinedURLPath, "")
 	}
-	return createURL(joinedUrlPath, "")
+	getDCOSURL()
+	joinedURLPath = path.Join("cosmos", "service", urlPath) // e.g. https://<dcos_url>/cosmos/service/describe
+	return createURL(config.DcosUrl, joinedURLPath, "")
 }
 
-func createURL(urlPath, urlQuery string) *url.URL {
-	parsedURL, err := url.Parse(urlPath)
+func createURL(baseURL, urlPath, urlQuery string) *url.URL {
+	parsedURL, err := url.Parse(baseURL)
 	if err != nil {
 		log.Fatalf("Unable to parse DC/OS Cluster URL '%s': %s", config.DcosUrl, err)
 	}
