@@ -17,11 +17,11 @@ import (
 
 func HTTPServiceGet(urlPath string) *http.Response {
 	servicePath := getServicePath(urlPath)
-	return checkHTTPResponse(httpQuery(CreateHTTPRequest("GET", servicePath)))
+	return checkHTTPResponse(httpQuery(createHTTPRequest("GET", servicePath)))
 }
 
-func HTTPGet(urlPath string) *http.Response {
-	return checkHTTPResponse(httpQuery(CreateHTTPRequest("GET", urlPath)))
+func HTTPCosmosGetJSON(urlPath, jsonPayload string) *http.Response {
+	return checkHTTPResponse(httpQuery(createCosmosHTTPJSONRequest("GET", urlPath, jsonPayload)))
 }
 
 func HTTPServiceGetQuery(urlPath, urlQuery string) *http.Response {
@@ -41,7 +41,7 @@ func HTTPServiceGetJSON(urlPath, jsonPayload string) *http.Response {
 
 func HTTPServiceDelete(urlPath string) *http.Response {
 	servicePath := getServicePath(urlPath)
-	return checkHTTPResponse(httpQuery(CreateHTTPRequest("DELETE", servicePath)))
+	return checkHTTPResponse(httpQuery(createHTTPRequest("DELETE", servicePath)))
 }
 
 func HTTPServiceDeleteQuery(urlPath, urlQuery string) *http.Response {
@@ -61,7 +61,7 @@ func HTTPServiceDeleteJSON(urlPath, jsonPayload string) *http.Response {
 
 func HTTPServicePost(urlPath string) *http.Response {
 	servicePath := getServicePath(urlPath)
-	return checkHTTPResponse(httpQuery(CreateHTTPRequest("POST", servicePath)))
+	return checkHTTPResponse(httpQuery(createHTTPRequest("POST", servicePath)))
 }
 
 func HTTPServicePostQuery(urlPath, urlQuery string) *http.Response {
@@ -79,9 +79,13 @@ func HTTPServicePostJSON(urlPath, jsonPayload string) *http.Response {
 	return checkHTTPResponse(httpQuery(createHTTPJSONRequest("POST", servicePath, jsonPayload)))
 }
 
+func HTTPCosmosPostJSON(urlPath, jsonPayload string) *http.Response {
+	return checkHTTPResponse(httpQuery(createCosmosHTTPJSONRequest("POST", urlPath, jsonPayload)))
+}
+
 func HTTPServicePut(urlPath string) *http.Response {
 	servicePath := getServicePath(urlPath)
-	return checkHTTPResponse(httpQuery(CreateHTTPRequest("PUT", servicePath)))
+	return checkHTTPResponse(httpQuery(createHTTPRequest("PUT", servicePath)))
 }
 
 func HTTPServicePutQuery(urlPath, urlQuery string) *http.Response {
@@ -190,19 +194,29 @@ func createHTTPJSONRequest(method, urlPath, jsonPayload string) *http.Request {
 }
 
 func createHTTPDataRequest(method, urlPath, jsonPayload, contentType string) *http.Request {
-	return createHTTPRawRequest(method, urlPath, "", jsonPayload, contentType)
+	return createHTTPRawRequest(method, urlPath, "", jsonPayload, "", contentType)
 }
 
 func createHTTPQueryRequest(method, urlPath, urlQuery string) *http.Request {
-	return createHTTPRawRequest(method, urlPath, urlQuery, "", "")
+	return createHTTPRawRequest(method, urlPath, urlQuery, "", "", "")
 }
 
-func CreateHTTPRequest(method, urlPath string) *http.Request {
-	return createHTTPRawRequest(method, urlPath, "", "", "")
+func createHTTPRequest(method, urlPath string) *http.Request {
+	return createHTTPRawRequest(method, urlPath, "", "", "", "")
 }
 
-func createHTTPRawRequest(method, urlPath, urlQuery, payload, contentType string) *http.Request {
-	return createHTTPURLRequest(method, createURL(urlPath, urlQuery), payload, contentType)
+func createCosmosHTTPJSONRequest(method, urlPath, jsonPayload string) *http.Request {
+	// NOTE: this only works for /service/ endpoints within Cosmos. See DCOS-15772
+	// for the "correct" solution to allow cleaner use of /package/ endpoints.
+	endpoint := strings.Replace(urlPath, "/", ".", -1)
+	acceptHeader := fmt.Sprintf("application/vnd.dcos.%s-response+json;charset=utf-8;version=v1", endpoint)
+	contentTypeHeader := fmt.Sprintf("application/vnd.dcos.%s-request+json;charset=utf-8;version=v1", endpoint)
+	cosmosURLPath := "cosmos/" + urlPath // e.g. cosmos/service/describe
+	return createHTTPRawRequest(method, cosmosURLPath, "", "", acceptHeader, contentTypeHeader)
+}
+
+func createHTTPRawRequest(method, urlPath, urlQuery, payload, accept, contentType string) *http.Request {
+	return createHTTPURLRequest(method, createURL(urlPath, urlQuery), payload, accept, contentType)
 }
 
 func getServicePath(urlPath string) string {
@@ -229,7 +243,7 @@ func createURL(urlPath, urlQuery string) *url.URL {
 	return parsedUrl
 }
 
-func createHTTPURLRequest(method string, url *url.URL, payload, contentType string) *http.Request {
+func createHTTPURLRequest(method string, url *url.URL, payload, accept, contentType string) *http.Request {
 	if config.Verbose {
 		log.Printf("HTTP Query: %s %s", method, url)
 		if len(payload) != 0 {
@@ -247,6 +261,9 @@ func createHTTPURLRequest(method string, url *url.URL, payload, contentType stri
 	}
 	if len(config.DcosAuthToken) != 0 {
 		request.Header.Set("Authorization", fmt.Sprintf("token=%s", config.DcosAuthToken))
+	}
+	if len(accept) != 0 {
+		request.Header.Set("Accept", accept)
 	}
 	if len(contentType) != 0 {
 		request.Header.Set("Content-Type", contentType)
