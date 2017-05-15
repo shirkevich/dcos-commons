@@ -16,8 +16,7 @@ import (
 )
 
 func HTTPServiceGet(urlPath string) *http.Response {
-	servicePath := getServicePath(urlPath)
-	return checkHTTPResponse(httpQuery(createHTTPRequest("GET", servicePath)))
+	return checkHTTPResponse(httpQuery(createServiceHTTPRequest("GET", urlPath)))
 }
 
 func HTTPCosmosGetJSON(urlPath, jsonPayload string) *http.Response {
@@ -25,58 +24,47 @@ func HTTPCosmosGetJSON(urlPath, jsonPayload string) *http.Response {
 }
 
 func HTTPServiceGetQuery(urlPath, urlQuery string) *http.Response {
-	servicePath := getServicePath(urlPath)
-	return checkHTTPResponse(httpQuery(createHTTPQueryRequest("GET", servicePath, urlQuery)))
+	return checkHTTPResponse(httpQuery(createServiceHTTPQueryRequest("GET", urlPath, urlQuery)))
 }
 
 func HTTPServiceGetData(urlPath, payload, contentType string) *http.Response {
-	servicePath := getServicePath(urlPath)
-	return checkHTTPResponse(httpQuery(createHTTPDataRequest("GET", servicePath, payload, contentType)))
+	return checkHTTPResponse(httpQuery(createServiceHTTPDataRequest("GET", urlPath, payload, contentType)))
 }
 
 func HTTPServiceGetJSON(urlPath, jsonPayload string) *http.Response {
-	servicePath := getServicePath(urlPath)
-	return checkHTTPResponse(httpQuery(createHTTPJSONRequest("GET", servicePath, jsonPayload)))
+	return checkHTTPResponse(httpQuery(createServiceHTTPJSONRequest("GET", urlPath, jsonPayload)))
 }
 
 func HTTPServiceDelete(urlPath string) *http.Response {
-	servicePath := getServicePath(urlPath)
-	return checkHTTPResponse(httpQuery(createHTTPRequest("DELETE", servicePath)))
+	return checkHTTPResponse(httpQuery(createServiceHTTPRequest("DELETE", urlPath)))
 }
 
 func HTTPServiceDeleteQuery(urlPath, urlQuery string) *http.Response {
-	servicePath := getServicePath(urlPath)
-	return checkHTTPResponse(httpQuery(createHTTPQueryRequest("DELETE", servicePath, urlQuery)))
+	return checkHTTPResponse(httpQuery(createServiceHTTPQueryRequest("DELETE", urlPath, urlQuery)))
 }
 
 func HTTPServiceDeleteData(urlPath, payload, contentType string) *http.Response {
-	servicePath := getServicePath(urlPath)
-	return checkHTTPResponse(httpQuery(createHTTPDataRequest("DELETE", servicePath, payload, contentType)))
+	return checkHTTPResponse(httpQuery(createServiceHTTPDataRequest("DELETE", urlPath, payload, contentType)))
 }
 
 func HTTPServiceDeleteJSON(urlPath, jsonPayload string) *http.Response {
-	servicePath := getServicePath(urlPath)
-	return checkHTTPResponse(httpQuery(createHTTPJSONRequest("DELETE", servicePath, jsonPayload)))
+	return checkHTTPResponse(httpQuery(createServiceHTTPJSONRequest("DELETE", urlPath, jsonPayload)))
 }
 
 func HTTPServicePost(urlPath string) *http.Response {
-	servicePath := getServicePath(urlPath)
-	return checkHTTPResponse(httpQuery(createHTTPRequest("POST", servicePath)))
+	return checkHTTPResponse(httpQuery(createServiceHTTPRequest("POST", urlPath)))
 }
 
 func HTTPServicePostQuery(urlPath, urlQuery string) *http.Response {
-	servicePath := getServicePath(urlPath)
-	return checkHTTPResponse(httpQuery(createHTTPQueryRequest("POST", servicePath, urlQuery)))
+	return checkHTTPResponse(httpQuery(createServiceHTTPQueryRequest("POST", urlPath, urlQuery)))
 }
 
 func HTTPServicePostData(urlPath, payload, contentType string) *http.Response {
-	servicePath := getServicePath(urlPath)
-	return checkHTTPResponse(httpQuery(createHTTPDataRequest("POST", servicePath, payload, contentType)))
+	return checkHTTPResponse(httpQuery(createServiceHTTPDataRequest("POST", urlPath, payload, contentType)))
 }
 
 func HTTPServicePostJSON(urlPath, jsonPayload string) *http.Response {
-	servicePath := getServicePath(urlPath)
-	return checkHTTPResponse(httpQuery(createHTTPJSONRequest("POST", servicePath, jsonPayload)))
+	return checkHTTPResponse(httpQuery(createServiceHTTPJSONRequest("POST", urlPath, jsonPayload)))
 }
 
 func HTTPCosmosPostJSON(urlPath, jsonPayload string) *http.Response {
@@ -84,23 +72,19 @@ func HTTPCosmosPostJSON(urlPath, jsonPayload string) *http.Response {
 }
 
 func HTTPServicePut(urlPath string) *http.Response {
-	servicePath := getServicePath(urlPath)
-	return checkHTTPResponse(httpQuery(createHTTPRequest("PUT", servicePath)))
+	return checkHTTPResponse(httpQuery(createServiceHTTPRequest("PUT", urlPath)))
 }
 
 func HTTPServicePutQuery(urlPath, urlQuery string) *http.Response {
-	servicePath := getServicePath(urlPath)
-	return checkHTTPResponse(httpQuery(createHTTPQueryRequest("PUT", servicePath, urlQuery)))
+	return checkHTTPResponse(httpQuery(createServiceHTTPQueryRequest("PUT", urlPath, urlQuery)))
 }
 
 func HTTPServicePutData(urlPath, payload, contentType string) *http.Response {
-	servicePath := getServicePath(urlPath)
-	return checkHTTPResponse(httpQuery(createHTTPDataRequest("PUT", servicePath, payload, contentType)))
+	return checkHTTPResponse(httpQuery(createServiceHTTPDataRequest("PUT", urlPath, payload, contentType)))
 }
 
 func HTTPServicePutJSON(urlPath, jsonPayload string) *http.Response {
-	servicePath := getServicePath(urlPath)
-	return checkHTTPResponse(httpQuery(createHTTPJSONRequest("PUT", servicePath, jsonPayload)))
+	return checkHTTPResponse(httpQuery(createServiceHTTPJSONRequest("PUT", urlPath, jsonPayload)))
 }
 
 func httpQuery(request *http.Request) *http.Response {
@@ -189,42 +173,36 @@ func checkHTTPResponse(response *http.Response) *http.Response {
 	return response
 }
 
-func createHTTPJSONRequest(method, urlPath, jsonPayload string) *http.Request {
-	return createHTTPDataRequest(method, urlPath, jsonPayload, "application/json")
+func createServiceHTTPJSONRequest(method, urlPath, jsonPayload string) *http.Request {
+	return createServiceHTTPDataRequest(method, urlPath, jsonPayload, "application/json")
 }
 
-func createHTTPDataRequest(method, urlPath, jsonPayload, contentType string) *http.Request {
-	return createHTTPRawRequest(method, urlPath, "", jsonPayload, "", contentType)
+func createServiceHTTPDataRequest(method, urlPath, jsonPayload, contentType string) *http.Request {
+	return createHTTPRawRequest(method, createServiceURL(urlPath, ""), jsonPayload, "", contentType)
 }
 
-func createHTTPQueryRequest(method, urlPath, urlQuery string) *http.Request {
-	return createHTTPRawRequest(method, urlPath, urlQuery, "", "", "")
+func createServiceHTTPQueryRequest(method, urlPath, urlQuery string) *http.Request {
+	return createHTTPRawRequest(method, createServiceURL(urlPath, urlQuery), "", "", "")
 }
 
-func createHTTPRequest(method, urlPath string) *http.Request {
-	return createHTTPRawRequest(method, urlPath, "", "", "", "")
+func createServiceHTTPRequest(method, urlPath string) *http.Request {
+	return createHTTPRawRequest(method, createServiceURL(urlPath, ""), "", "", "")
 }
 
 func createCosmosHTTPJSONRequest(method, urlPath, jsonPayload string) *http.Request {
-	// NOTE: this only works for /service/ endpoints within Cosmos. See DCOS-15772
+	// NOTE: this explicitly only allows use of /service/ endpoints within Cosmos. See DCOS-15772
 	// for the "correct" solution to allow cleaner use of /package/ endpoints.
 	endpoint := strings.Replace(urlPath, "/", ".", -1)
-	acceptHeader := fmt.Sprintf("application/vnd.dcos.%s-response+json;charset=utf-8;version=v1", endpoint)
-	contentTypeHeader := fmt.Sprintf("application/vnd.dcos.%s-request+json;charset=utf-8;version=v1", endpoint)
-	cosmosURLPath := "cosmos/" + urlPath // e.g. cosmos/service/describe
-	return createHTTPRawRequest(method, cosmosURLPath, "", "", acceptHeader, contentTypeHeader)
+	acceptHeader := fmt.Sprintf("application/vnd.dcos.service.%s-response+json;charset=utf-8;version=v1", endpoint)
+	contentTypeHeader := fmt.Sprintf("application/vnd.dcos.service.%s-request+json;charset=utf-8;version=v1", endpoint)
+	return createHTTPRawRequest(method, createCosmosURL(urlPath), "", acceptHeader, contentTypeHeader)
 }
 
-func createHTTPRawRequest(method, urlPath, urlQuery, payload, accept, contentType string) *http.Request {
-	return createHTTPURLRequest(method, createURL(urlPath, urlQuery), payload, accept, contentType)
+func createHTTPRawRequest(method string, url *url.URL, payload, accept, contentType string) *http.Request {
+	return createHTTPURLRequest(method, url, payload, accept, contentType)
 }
 
-func getServicePath(urlPath string) string {
-	servicePath := path.Join("service", config.ServiceName, urlPath)
-	return servicePath
-}
-
-func createURL(urlPath, urlQuery string) *url.URL {
+func getDCOSURL() {
 	// get data from CLI, if overrides were not provided by user:
 	if len(config.DcosUrl) == 0 {
 		config.DcosUrl = RequiredCLIConfigValue(
@@ -234,13 +212,38 @@ func createURL(urlPath, urlQuery string) *url.URL {
 	}
 	// Trim eg "/#/" from copy-pasted Dashboard URL:
 	config.DcosUrl = strings.TrimRight(config.DcosUrl, "#/")
-	parsedUrl, err := url.Parse(config.DcosUrl)
+}
+
+func createServiceURL(urlPath, urlQuery string) *url.URL {
+	getDCOSURL()
+	joinedUrlPath := path.Join(config.DcosUrl, "service", config.ServiceName, urlPath)
+	return createURL(joinedUrlPath, urlQuery)
+}
+
+func createCosmosURL(urlPath string) *url.URL {
+	joinedUrlPath := ""
+	// Try to fetch the Cosmos URL from the system configuration
+	if len(config.CosmosUrl) == 0 {
+		config.CosmosUrl = OptionalCLIConfigValue("package.cosmos_url")
+	}
+	// Use Cosmos URL if we have it specified
+	if len(config.CosmosUrl) > 0 {
+		joinedUrlPath = path.Join(config.CosmosUrl, urlPath) // e.g. https://<cosmos_url>/service/describe
+	} else {
+		getDCOSURL()
+		joinedUrlPath = path.Join(config.DcosUrl, "cosmos", urlPath) // e.g. https://<dcos_url>/cosmos/service/describe
+	}
+	return createURL(joinedUrlPath, "")
+}
+
+func createURL(urlPath, urlQuery string) *url.URL {
+	parsedURL, err := url.Parse(urlPath)
 	if err != nil {
 		log.Fatalf("Unable to parse DC/OS Cluster URL '%s': %s", config.DcosUrl, err)
 	}
-	parsedUrl.Path = urlPath
-	parsedUrl.RawQuery = urlQuery
-	return parsedUrl
+	parsedURL.Path = urlPath
+	parsedURL.RawQuery = urlQuery
+	return parsedURL
 }
 
 func createHTTPURLRequest(method string, url *url.URL, payload, accept, contentType string) *http.Request {

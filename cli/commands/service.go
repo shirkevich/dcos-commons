@@ -44,8 +44,7 @@ func parseDescribeResponse(responseBytes []byte) string {
 func (cmd *DescribeHandler) DescribeConfiguration(c *kingpin.ParseContext) error {
 	// TODO: add error handling
 	requestContent, _ := json.Marshal(DescribeRequest{config.ServiceName})
-	cosmosUrlPath := "service/describe"
-	response := client.HTTPCosmosGetJSON(cosmosUrlPath, string(requestContent))
+	response := client.HTTPCosmosGetJSON("describe", string(requestContent))
 	resolvedOptions := parseDescribeResponse(client.GetResponseBytes(response))
 	client.PrintText(resolvedOptions)
 	return nil
@@ -80,7 +79,7 @@ func parseUpdateResponse(responseBytes []byte) string {
 }
 
 func (cmd *UpdateHandler) UpdateConfiguration(c *kingpin.ParseContext) error {
-	cosmosUrlPath := "service/update"
+	// TODO: add error handling
 	request := UpdateRequest{AppID: config.ServiceName}
 	if len(cmd.PackageVersion) > 0 {
 		// TODO: check package version format is valid
@@ -94,7 +93,7 @@ func (cmd *UpdateHandler) UpdateConfiguration(c *kingpin.ParseContext) error {
 		request.OptionsJSON = optionsJSON
 	}
 	requestContent, _ := json.Marshal(request)
-	response := client.HTTPCosmosPostJSON(cosmosUrlPath, string(requestContent))
+	response := client.HTTPCosmosPostJSON("update", string(requestContent))
 	outputResponse := parseUpdateResponse(client.GetResponseBytes(response))
 	client.PrintText(outputResponse)
 	return nil
