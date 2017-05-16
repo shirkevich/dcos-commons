@@ -191,7 +191,7 @@ func createCosmosHTTPJSONRequest(method, urlPath, jsonPayload string) *http.Requ
 	endpoint := strings.Replace(urlPath, "/", ".", -1)
 	acceptHeader := fmt.Sprintf("application/vnd.dcos.service.%s-response+json;charset=utf-8;version=v1", endpoint)
 	contentTypeHeader := fmt.Sprintf("application/vnd.dcos.service.%s-request+json;charset=utf-8;version=v1", endpoint)
-	return createHTTPRawRequest(method, createCosmosURL(urlPath), "", acceptHeader, contentTypeHeader)
+	return createHTTPRawRequest(method, createCosmosURL(urlPath), jsonPayload, acceptHeader, contentTypeHeader)
 }
 
 func createHTTPRawRequest(method string, url *url.URL, payload, accept, contentType string) *http.Request {
